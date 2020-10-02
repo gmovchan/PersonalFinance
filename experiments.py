@@ -1,4 +1,5 @@
 import pandas as pd
+from random import randrange
 
 moneyDB = pd.DataFrame.from_dict({"years": [], "months": [], "days": [], "wallet": [], "drawer": [],
                                   "bank": []}).astype("int64")
@@ -34,7 +35,7 @@ moneyDB = moneyDB.append({"years": 2018, "months": 9, "days": 25, "wallet": 500,
 #print(moneyDB.sort_values(by=["years", "months", "days"], ascending=False).drop_duplicates(["months"], keep="first").head(100))
 #print(moneyDB.sort_values(by=["years"], ascending=False).drop_duplicates(["years"], keep="first")["years"].tolist())
 
-years = moneyDB.sort_values(by=["years"], ascending=False).drop_duplicates(["years"], keep="first")["years"].tolist()
+'''years = moneyDB.sort_values(by=["years"], ascending=False).drop_duplicates(["years"], keep="first")["years"].tolist()
 print(moneyDB.head(100))
 for year in years:
     print(year)
@@ -43,5 +44,8 @@ for year in years:
     moneyDBByYears = pd.concat([moneyDBByYears, oneYear], ignore_index=True)
     print(oneYear)
 
-print(moneyDBByYears.head(100))
+print(moneyDBByYears.head(100))'''
 #print(moneyDB["years"].tolist())
+
+print(randrange(2020, 2021))
+print("a".isdigit())
