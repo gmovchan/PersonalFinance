@@ -6,7 +6,7 @@ from telegram.ext import CommandHandler
 from telegram.ext import MessageHandler, Filters
 from passwords import moneyBucketsToken
 
-updater = Updater(token=MessageHandler, use_context=True)
+updater = Updater(token=moneyBucketsToken, use_context=True)
 dispatcher = updater.dispatcher
 
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
@@ -21,15 +21,22 @@ def caps(update, context):
     text_caps = " ".join(context.args).upper()
     context.bot.send_message(chat_id=update.effective_chat.id, text=text_caps)
 
+def unknown(update, context):
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Sorry, I didn't understand that command.")
+
 start_handler = CommandHandler("start", start)
 echo_handler = MessageHandler(Filters.text & (~Filters.command), echo)
 caps_handler = CommandHandler("caps", caps)
+unknown_handler = MessageHandler(Filters.command, unknown)
 
 dispatcher.add_handler(start_handler)
 dispatcher.add_handler(echo_handler)
 dispatcher.add_handler(caps_handler)
+dispatcher.add_handler(unknown_handler)
+
 
 updater.start_polling()
+#updater.stop()
 
 '''bot = telegram.Bot(token="1296037754:AAFnsmrAHX2ejtvUbl2iaE_PLYQCAGQCWgQ")
 print(bot.get_me())'''

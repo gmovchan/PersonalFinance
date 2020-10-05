@@ -23,4 +23,6 @@ from telegram.ext import InlineQueryHandler
 inline_caps_handler = InlineQueryHandler(inline_caps)
 dispatcher.add_handler(inline_caps_handler)
 
+
+
 updater.start_polling()
