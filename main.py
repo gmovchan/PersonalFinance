@@ -21,29 +21,20 @@ class personalFinance():
         self.today = date.today()
     
     
-    def addMoney(self, df):
-        currentMoney = {"wallet": 0, "drawer": 0, "bank": 0}
-    
-        num = input("in the wallet: ")
-        currentMoney["wallet"] = num if num.isdigit() else 0
-    
-        num = input("in the drawer: ")
-        currentMoney["drawer"] = num if num.isdigit() else 0
-    
-        num = input("in the bank account: ")
-        currentMoney["bank"] = num if num.isdigit() else 0
-    
+    def addMoney(self, df, pockets):
+        # check whether you have already added money today or not. If you have done it then the last entry
+        # will be rewritten.
         matchingRows = df[(self.moneyDB["years"] == self.today.year) & (df["months"] == self.today.month) & (df["days"] == self.today.day)]
     
         if matchingRows.empty:
             df = df.append({"years": self.today.year, "months": self.today.month, "days": self.today.day,
-                            "wallet": currentMoney["wallet"], "drawer": currentMoney["drawer"],
-                            "bank": currentMoney["bank"]}, ignore_index=True)
+                            "wallet": pockets["wallet"], "drawer": pockets["drawer"],
+                            "bank": pockets["bank"]}, ignore_index=True)
         else:
             indexRow = matchingRows.iloc[0].name
-            df = df.replace({"wallet": {df["wallet"][indexRow]: currentMoney["wallet"]},
-                             "drawer": {df["drawer"][indexRow]: currentMoney["drawer"]},
-                             "bank": {df["bank"][indexRow]: currentMoney["bank"]}})
+            df = df.replace({"wallet": {df["wallet"][indexRow]: pockets["wallet"]},
+                             "drawer": {df["drawer"][indexRow]: pockets["drawer"]},
+                             "bank": {df["bank"][indexRow]: pockets["bank"]}})
         return df
     
     
@@ -52,23 +43,33 @@ class personalFinance():
         #print(df.head(100))
         lastMonth = df.iloc[0]
         lastMonthSum = int(lastMonth.wallet + lastMonth.drawer + lastMonth.bank)
-        print(lastMonthSum)
-        print("You have {} rubles in total".format(int(lastMonthSum)))
+        #print(lastMonthSum)
+        #print("You have {} rubles in total".format(int(lastMonthSum)))
         return lastMonthSum
     
-    def compareMonths(self, df, lastMonthSum):
+    def compareMonths(self, df, currentMonthSum):
+
+        message = "You've saved up {} rubles.".format(currentMonthSum)
+
         if not df.iloc[1].empty:
             response = ""
             previousMonth = df.iloc[1]
             previousMonthSum = int(previousMonth.wallet + previousMonth.drawer + previousMonth.bank)
+
+            message = "You've saved up {} rubles.".format(currentMonthSum)
     
-            if previousMonthSum > lastMonthSum:
-                return "You have {} rubles less than last month.".format(previousMonthSum - lastMonthSum)
-            elif previousMonthSum < lastMonthSum:
-                return"Your current profit compared to last month is {} rubles.".format(
-                    lastMonthSum - previousMonthSum)
+            if previousMonthSum > currentMonthSum:
+                message += "\nYou have {} rubles less than last month.".format(previousMonthSum - currentMonthSum)
+            elif previousMonthSum < currentMonthSum:
+                message += "\nYour current profit compared to last month is {} rubles.".format(
+                    currentMonthSum - previousMonthSum)
             else:
-                return "There is neither profit nor expenditure."
+                message += "\nThere is neither profit nor expenditure."
+
+            return message
+        else:
+            message += "\nAnd this is your first month of tracking. Here is no other entries yet."
+            return message
 
     # return dataframe that contains only the last day of a month and has no duplicates 
     def getCleanedMoneyDB(self, df, emptyDF):
@@ -105,15 +106,26 @@ class personalFinance():
 
     def start(self):
         while input("Would you lile to add an entry (y/n)? ") == "y":
+            
+            pockets = {"wallet": 0, "drawer": 0, "bank": 0}
+
+            num = input("in the wallet: ")
+            pockets["wallet"] = int(num) if num.isdigit() else 0
+
+            num = input("in the drawer: ")
+            pockets["drawer"] = int(num) if num.isdigit() else 0
+
+            num = input("in the bank account: ")
+            pockets["bank"] = int(num) if num.isdigit() else 0
+        
             #clear_output()
-            self.moneyDB = self.addMoney(self.moneyDB)
+            self.moneyDB = self.addMoney(self.moneyDB, pockets)
             print(self.moneyDB)
 
         self.cleanedMoneyDB = self.getCleanedMoneyDB(self.moneyDB, self.cleanedMoneyDB)
         #print(self.cleanedMoneyDB.head(100))
         if input("Would you lile to know the amount of money you currently have(y/n)? ") == "y":
-            sum = self.getSum(self.cleanedMoneyDB)
-            print(self.compareMonths(self.moneyDB, sum))
+            print(self.compareMonths(self.cleanedMoneyDB, self.getSum(self.cleanedMoneyDB)))
 
         if input("Do you want to see the list of entries (y/n)? ") == "y":
             print(self.showListByMonths(self.cleanedMoneyDB, input("How many entries do you want to get at once (number)?")))
