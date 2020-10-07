@@ -9,7 +9,7 @@ class personalFinance():
         
         self.moneyDB = pd.DataFrame.from_dict({"years": [], "months": [], "days": [], "wallet": [], "drawer": [],
                                           "bank": []}).astype("int64")
-        self.cleanedMoneyDB = self.moneyDB.copy()
+        self.emptyMoneyDB = self.moneyDB.copy()
         
         count = 0
         while count < 12:
@@ -19,6 +19,8 @@ class personalFinance():
             count += 1
         
         self.today = date.today()
+
+        self.cleanedMoneyDB = self.getCleanedMoneyDB()
     
     
     def addMoney(self, df, pockets):
@@ -38,22 +40,24 @@ class personalFinance():
         return df
     
     
-    def getSum(self, df):
+    def getSum(self):
         #df = df.sort_values(by=["years", "months", "days"], ascending=False).drop_duplicates(["months"], keep="first")
         #print(df.head(100))
-        lastMonth = df.iloc[0]
+        lastMonth = self.cleanedMoneyDB.iloc[0]
         lastMonthSum = int(lastMonth.wallet + lastMonth.drawer + lastMonth.bank)
         #print(lastMonthSum)
         #print("You have {} rubles in total".format(int(lastMonthSum)))
         return lastMonthSum
     
-    def compareMonths(self, df, currentMonthSum):
+    def compareMonths(self):
+
+        currentMonthSum = self.getSum()
 
         message = "You've saved up {} rubles.".format(currentMonthSum)
 
-        if not df.iloc[1].empty:
+        if not self.cleanedMoneyDB.iloc[1].empty:
             response = ""
-            previousMonth = df.iloc[1]
+            previousMonth = self.cleanedMoneyDB.iloc[1]
             previousMonthSum = int(previousMonth.wallet + previousMonth.drawer + previousMonth.bank)
 
             message = "You've saved up {} rubles.".format(currentMonthSum)
@@ -72,17 +76,20 @@ class personalFinance():
             return message
 
     # return dataframe that contains only the last day of a month and has no duplicates 
-    def getCleanedMoneyDB(self, df, emptyDF):
-        years = df.sort_values(by=["years"], ascending=False).drop_duplicates(["years"], keep="first")[
+    def getCleanedMoneyDB(self):
+        #print(self.moneyDB)
+        cleandDF = self.emptyMoneyDB.copy()
+        years = self.moneyDB.sort_values(by=["years"], ascending=False).drop_duplicates(["years"], keep="first")[
             "years"].tolist()
-        #print(df.head(100))
+        #print(years)
         for year in years:
             #print(year)
-            oneYear = df.loc[df["years"] == year].sort_values(by=["months", "days"], ascending=False) \
+            oneYear = self.moneyDB.loc[self.moneyDB["years"] == year].sort_values(by=["months", "days"], ascending=False) \
                 .drop_duplicates(["months"], keep="first")
-            emptyDF = pd.concat([emptyDF, oneYear], ignore_index=True)
+            cleandDF = pd.concat([cleandDF, oneYear], ignore_index=True)
             #print(oneYear)
-        return emptyDF
+        #print(cleandDF)
+        return cleandDF
     
     def getExpenditure(self):
         pass
@@ -97,38 +104,46 @@ class personalFinance():
     def loadMoneyDB(self):
         pass
     
-    def showListByMonths(self, df, n):
-        if n.isdigit():
+    def showListByMonths(self):
+        '''if n.isdigit():
             n = int(n)
         elif not n or not isinstance(n, int):
-            n = 1000
-        return df.head(n)
+            n = 1000'''
+        return self.cleanedMoneyDB.head(100)
+
+    def imputMoneyToAdd(self):
+        pockets = {"wallet": 0, "drawer": 0, "bank": 0}
+
+        num = input("in the wallet: ")
+        pockets["wallet"] = int(num) if num.isdigit() else 0
+
+        num = input("in the drawer: ")
+        pockets["drawer"] = int(num) if num.isdigit() else 0
+
+        num = input("in the bank account: ")
+        pockets["bank"] = int(num) if num.isdigit() else 0
+
+        # clear_output()
+        self.moneyDB = self.addMoney(self.moneyDB, pockets)
+        print(self.moneyDB)
+
+    def getJSON(self):
+        return self.cleanedMoneyDB.to_json()
+
+    def getTable(self):
+        return "<pre>" + self.cleanedMoneyDB.to_html() + "</pre>"
 
     def start(self):
         while input("Would you lile to add an entry (y/n)? ") == "y":
-            
-            pockets = {"wallet": 0, "drawer": 0, "bank": 0}
-
-            num = input("in the wallet: ")
-            pockets["wallet"] = int(num) if num.isdigit() else 0
-
-            num = input("in the drawer: ")
-            pockets["drawer"] = int(num) if num.isdigit() else 0
-
-            num = input("in the bank account: ")
-            pockets["bank"] = int(num) if num.isdigit() else 0
-        
-            #clear_output()
-            self.moneyDB = self.addMoney(self.moneyDB, pockets)
-            print(self.moneyDB)
-
-        self.cleanedMoneyDB = self.getCleanedMoneyDB(self.moneyDB, self.cleanedMoneyDB)
+            self.imputMoneyToAdd()
         #print(self.cleanedMoneyDB.head(100))
-        if input("Would you lile to know the amount of money you currently have(y/n)? ") == "y":
-            print(self.compareMonths(self.cleanedMoneyDB, self.getSum(self.cleanedMoneyDB)))
+        if input("Would you like to know the amount of money you currently have(y/n)? ") == "y":
+            print(self.compareMonths())
 
         if input("Do you want to see the list of entries (y/n)? ") == "y":
-            print(self.showListByMonths(self.cleanedMoneyDB, input("How many entries do you want to get at once (number)?")))
+            print(self.showListByMonths())
 
 finance = personalFinance()
-finance.start()
+#print(finance.getJSON())
+#finance.start()
+print(finance.getTable())
