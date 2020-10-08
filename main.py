@@ -131,7 +131,7 @@ class personalFinance():
         return self.cleanedMoneyDB.to_json()
 
     def getTable(self):
-        return "<pre>" + self.cleanedMoneyDB.to_html() + "</pre>"
+        return "<pre>" + self.cleanedMoneyDB.to_string() + "</pre>"
 
     def start(self):
         while input("Would you lile to add an entry (y/n)? ") == "y":
@@ -146,4 +146,4 @@ class personalFinance():
 finance = personalFinance()
 #print(finance.getJSON())
 #finance.start()
-print(finance.getTable())
+#print(finance.getTable())

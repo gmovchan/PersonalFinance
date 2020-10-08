@@ -49,3 +49,9 @@ print(moneyDBByYears.head(100))'''
 
 print(randrange(2020, 2021))
 print("a".isdigit())
+
+a, b, c, d = range(4)
+print(a)
+print(b)
+print(c)
+print(d)
