@@ -4,8 +4,8 @@ from telegram.ext import (CommandHandler, MessageHandler, Filters, Updater, Conv
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove, ParseMode)
 from passwords import moneyBucketsToken
 from main import personalFinance
-#from main import engine
-from main import createNewEngine
+from main import engine
+#from main import createNewEngine
 
 #print(engine.execute("SELECT * FROM money").fetchall())
 
@@ -25,7 +25,7 @@ pockets = {"wallet": 0, "drawer": 0, "bank": 0}
 WALLET, DRAWER, BANK, SUM = range(4)
 
 def start(update, context):
-    engine = createNewEngine()
+    #engine = createNewEngine()
     global finance
     print(engine.table_names())
     finance = personalFinance(engine, update.effective_chat.id)

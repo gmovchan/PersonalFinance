@@ -84,3 +84,19 @@ for key in pockets:
     pockets[key] = int(pockets[key])
 
 print(pockets)
+
+users = [randrange(100000000, 999999999) for x in range(5)]
+users.append(183291591)
+print(users)
+
+users = [771637784, 760305618, 921123602, 560227159, 968638050, 183291591]
+
+moneyDB = pd.DataFrame.from_dict({"users": [], "years": [], "months": [], "days": [], "wallet": [], "drawer": [],
+                                          "bank": []}).astype("int64")
+
+for x in range(31):
+    moneyDB = moneyDB.append({"users": users[randrange(0, 6)], "years": randrange(2016, 2020), "months":
+        randrange(1, 13), "days": randrange(1, 32), "wallet": randrange(0, 1000), "drawer": randrange(0, 1000), "bank":
+        randrange(0, 1000)}, ignore_index=True)
+
+print(moneyDB.head(100))

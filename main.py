@@ -12,7 +12,7 @@ from sqlalchemy import create_engine
 #print(table.keys())
 #print(table.column_descriptions())
 
-def createNewEngine():
+'''def createNewEngine():
     moneyDB = pd.DataFrame.from_dict({"users": [], "years": [], "months": [], "days": [], "wallet": [], "drawer": [],
                                       "bank": []}).astype("int64")
 
@@ -24,7 +24,9 @@ def createNewEngine():
 
     engine = create_engine("sqlite://", echo=False)
     moneyDB.to_sql("money", con=engine)
-    return engine
+    return engine'''
+
+engine = create_engine("sqlite:///C:\\sqlite\\finance.db", echo=False)
 
 
 
@@ -163,6 +165,7 @@ class personalFinance():
             n = int(n)
         elif not n or not isinstance(n, int):
             n = 1000'''
+        self.updateCleanedTable()
         return self.cleanedTable.head(100)
 
     def inputMoneyToAdd(self):
@@ -187,9 +190,22 @@ class personalFinance():
 
     def getTable(self):
         self.updateCleanedTable()
-        print(self.cleanedTable.to_string())
+        #print(self.cleanedTable.to_string())
         #return "<pre>" + self.cleanedTable.to_string() + "</pre>"
-        return self.cleanedTable.to_string()
+        #return self.cleanedTable.to_string()
+
+        print(self.cleanedTable.to_string())
+
+        result = ""
+
+        for index, row in self.cleanedTable.iterrows():
+            sum = int(row['wallet']) + int(row['drawer']) + int(row['bank'])
+            result += "Date: {}/{}/{}\nwallet {} \u20BD, drawer {} \u20BD, bank {} \u20BD\nIn total: {} \u20BD\n\n".format(row['days'], row['months'], \
+            row['years'], row['wallet'], row['drawer'], row['bank'], sum)
+
+        print(result)
+
+        return result
 
     def start(self):
         while input("Would you like to add an entry (y/n)? ") == "y":
