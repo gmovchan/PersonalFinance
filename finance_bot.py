@@ -27,7 +27,7 @@ WALLET, DRAWER, BANK, SUM = range(4)
 def start(update, context):
     #engine = createNewEngine()
     global finance
-    print(engine.table_names())
+    #print(engine.table_names())
     finance = personalFinance(engine, update.effective_chat.id)
     context.bot.send_message(chat_id=update.effective_chat.id, text="Hello, {}!".format(update.effective_chat.first_name))
 
