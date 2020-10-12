@@ -58,7 +58,7 @@ class personalFinance():
         self.cleanedTable = self.updateCleanedTable()
 
     def saveToSQL(self):
-        self.moneyDB.to_sql("money", self.engine, if_exists="replace", index_label="index")
+        self.moneyDB.to_sql("money", self.engine, if_exists="append", index_label="index")
         print(self.engine.execute("SELECT * FROM money").fetchall())
     
     
@@ -67,22 +67,25 @@ class personalFinance():
         for key in pockets:
             print(key)
             pockets[key] = int(pockets[key])
-
-        df = self.moneyDB
+        print(self.moneyDB)
         # check whether you have already added money today or not. If you have done it then the last entry
         # will be rewritten.
-        matchingRows = df[(self.moneyDB["years"] == self.today.year) & (df["months"] == self.today.month) & (df["days"] == self.today.day)]
+        matchingRows = self.moneyDB[(self.moneyDB["years"] == self.today.year) & (self.moneyDB["months"] == self.today.month) & (self.moneyDB["days"] == self.today.day)]
     
         if matchingRows.empty:
-            df = df.append({"users": self.user, "years": self.today.year, "months": self.today.month, "days": self.today.day,
+            '''self.moneyDB = self.moneyDB.append({"users": self.user, "years": self.today.year, "months": self.today.month, "days": self.today.day,
                             "wallet": pockets["wallet"], "drawer": pockets["drawer"],
-                            "bank": pockets["bank"]}, ignore_index=True)
+                            "bank": pockets["bank"]}, ignore_index=True)'''
+            self.moneyDB = self.moneyDB.append(
+                {"users": self.user, "years": self.today.year, "months": self.today.month, "days": self.today.day,
+                 "wallet": pockets["wallet"], "drawer": pockets["drawer"],
+                 "bank": pockets["bank"]})
         else:
             indexRow = matchingRows.iloc[0].name
-            df = df.replace({"wallet": {df["wallet"][indexRow]: pockets["wallet"]},
-                             "drawer": {df["drawer"][indexRow]: pockets["drawer"]},
-                             "bank": {df["bank"][indexRow]: pockets["bank"]}})
-        self.moneyDB = df
+            self.moneyDB = self.moneyDB.replace({"wallet": {self.moneyDB["wallet"][indexRow]: pockets["wallet"]},
+                             "drawer": {self.moneyDB["drawer"][indexRow]: pockets["drawer"]},
+                             "bank": {self.moneyDB["bank"][indexRow]: pockets["bank"]}})
+        print(self.moneyDB)
         self.saveToSQL()
 
     def getLastMonth(self):
@@ -146,19 +149,6 @@ class personalFinance():
         #print(cleandDF)
         self.cleanedTable = cleandDF
         return True
-    
-    def getExpenditure(self):
-        pass
-    
-    
-    def getProfit(self):
-        pass
-    
-    def saveMoneyDB(self):
-        pass
-    
-    def loadMoneyDB(self):
-        pass
     
     def showListByMonths(self):
         '''if n.isdigit():

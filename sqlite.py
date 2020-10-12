@@ -15,11 +15,14 @@ def fillDB():
                                       randrange(0, 1000)}, ignore_index=True)
 
     engine = create_engine("sqlite:///C:\\sqlite\\finance.db", echo=False)
-    moneyDB.to_sql("money", con=engine)
+    moneyDB.to_sql("money", con=engine, if_exists="replace")
+
+    return True
 
 engine = create_engine("sqlite:///C:\\sqlite\\finance.db", echo=False)
 
-moneyDB = pd.read_sql_table("money", engine, index_col="index")
+fillDB()
+'''moneyDB = pd.read_sql_table("money", engine, index_col="index")
 moneyDB = moneyDB[moneyDB["users"] == int(183291591)]
 print(moneyDB.iterrows())
 
@@ -27,4 +30,4 @@ result = ""
 for index, row in moneyDB.iterrows():
     result += "Date: {}/{}/{}, wallet {} \u20BD, drawer {} \u20BD, bank {} \u20BD\n".format(row['days'], row['months'], \
     row['years'], row['wallet'], row['drawer'], row['bank'])
-print(result)
+print(result)'''

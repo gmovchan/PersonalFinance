@@ -69,7 +69,7 @@ engine = create_engine("sqlite://", echo=False)
 moneyDB.to_sql("money", con=engine)
 
 SqlDB = pd.read_sql_table("money", engine, index_col="index")
-print(SqlDB)
+#print(SqlDB)
 
 '''query = "SELECT * FROM money WHERE users = {}".format("183291591")
 result = engine.execute(query).fetchall()
@@ -80,14 +80,14 @@ int(1)
 
 pockets = {"wallet": "1", "drawer": "2", "bank": "3"}
 for key in pockets:
-    print(key)
+    #print(key)
     pockets[key] = int(pockets[key])
 
-print(pockets)
+#print(pockets)
 
 users = [randrange(100000000, 999999999) for x in range(5)]
 users.append(183291591)
-print(users)
+#print(users)
 
 users = [771637784, 760305618, 921123602, 560227159, 968638050, 183291591]
 
@@ -99,4 +99,13 @@ for x in range(31):
         randrange(1, 13), "days": randrange(1, 32), "wallet": randrange(0, 1000), "drawer": randrange(0, 1000), "bank":
         randrange(0, 1000)}, ignore_index=True)
 
-print(moneyDB.head(100))
+#print(moneyDB.head(100))
+
+df = pd.DataFrame([[1, 2], [3, 4]], columns=["a", "b"])
+df2 = pd.DataFrame([[1, 2]], columns=["a", "b"])
+df2 = df2.rename(index={0: 2})
+print(df2.head())
+df = df.append(df2)
+print(df.head())
+print("max")
+print(df.index.max())
