@@ -24,6 +24,12 @@ pockets = {"wallet": 0, "drawer": 0, "bank": 0}
 
 WALLET, DRAWER, BANK, SUM = range(4)
 
+def checkInput(update):
+    if not update.message.text.isdigit():
+        update.message.reply_text("You can only send an integer in this case. Try again or send /cancel")
+        return False
+    return True
+
 def start(update, context):
     #engine = createNewEngine()
     global finance
@@ -44,7 +50,11 @@ def add(update, context):
 
 
 def wallet(update, context):
+    if not checkInput(update):
+        return WALLET
+
     pockets["wallet"] = update.message.text
+
     #print(pockets)
     # reply_keyboard = ["Yes", "No"]
     update.message.reply_text("How much money in your drawer? Type below.")
@@ -52,6 +62,9 @@ def wallet(update, context):
     return DRAWER
 
 def drawer(update, context):
+    if not checkInput(update):
+        return DRAWER
+
     pockets["drawer"] = update.message.text
     #print(pockets)
     # reply_keyboard = ["Yes", "No"]
@@ -60,13 +73,16 @@ def drawer(update, context):
     return BANK
 
 def bank(update, context):
+    if not checkInput(update):
+        return BANK
+
     pockets["bank"] = update.message.text
     finance.addMoney(pockets)
     #print(pockets)
     # reply_keyboard = ["Yes", "No"]
-    update.message.reply_text("print to /pots to see how much money you have.")
+    update.message.reply_text("type to /pots to see how much money you have.")
 
-    return ConversationHandler.END
+    #return ConversationHandler.END
 
 def pots(update, context):
     #print(pockets)
@@ -84,6 +100,8 @@ def sum(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text=finance.compareMonths())
 
 def cancel(update, context):
+    print("try to cancel")
+    #user = update.message.from_user
     update.message.reply_text("You have decided not to add a new entry.")
 
     return ConversationHandler.END
@@ -97,16 +115,14 @@ conv_handler = ConversationHandler(
     entry_points=[CommandHandler("add", add)],
 
     states = {
-        WALLET: [MessageHandler(Filters.text, wallet)],
+        WALLET: [MessageHandler(Filters.text & ~Filters.command, wallet)],
 
-        DRAWER: [MessageHandler(Filters.text, drawer)],
+        DRAWER: [MessageHandler(Filters.text & ~Filters.command, drawer)],
 
-        BANK: [MessageHandler(Filters.text, bank)],
-
-        SUM: [MessageHandler(Filters.text, sum)]
+        BANK: [MessageHandler(Filters.text & ~Filters.command, bank)],
     },
 
-    fallbacks=[CommandHandler("cancel", cancel)]
+    fallbacks=[CommandHandler('cancel', cancel)],
 )
 
 dispatcher.add_handler(start_handler)
