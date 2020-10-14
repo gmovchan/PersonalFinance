@@ -17,12 +17,18 @@ from main import engine
 
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 
-updater = Updater(token=moneyBucketsToken, use_context=True)
-dispatcher = updater.dispatcher
-
 pockets = {"wallet": 0, "drawer": 0, "bank": 0}
 
 WALLET, DRAWER, BANK, SUM = range(4)
+
+finance = False
+
+def createFinanceModel(id):
+    global finance
+
+    if not finance:
+        finance = personalFinance(engine, id)
+
 
 def checkInput(update):
     if not update.message.text.isdigit():
@@ -32,17 +38,25 @@ def checkInput(update):
 
 def start(update, context):
     #engine = createNewEngine()
-    global finance
+    #global finance
     #print(engine.table_names())
-    finance = personalFinance(engine, update.effective_chat.id)
+    #createFinanceModel(update.effective_chat.id)
     context.bot.send_message(chat_id=update.effective_chat.id, text="Hello, {}!".format(update.effective_chat.first_name))
 
 def show(update, context):
+    global finance
+    print("finance in show")
+    print(finance)
+    createFinanceModel(update.effective_chat.id)
     #print(finance.getTable())
     print(update.effective_chat)
     context.bot.send_message(chat_id=update.effective_chat.id, text=finance.getTable())
 
 def add(update, context):
+    print("add")
+    createFinanceModel(update.effective_chat.id)
+    print("finance in add")
+    print(finance)
     #reply_keyboard = ["Yes", "No"]
     update.message.reply_text("How much money in your wallet? Type below.")
 
@@ -82,9 +96,10 @@ def bank(update, context):
     # reply_keyboard = ["Yes", "No"]
     update.message.reply_text("type to /pots to see how much money you have.")
 
-    #return ConversationHandler.END
+    return ConversationHandler.END
 
 def pots(update, context):
+    createFinanceModel(update.effective_chat.id)
     #print(pockets)
     # reply_keyboard = ["Yes", "No"]
     #update.message.reply_text("You have {} in the wallet, {} in the drawer and {} in the bank account.".format(
@@ -96,6 +111,7 @@ def pots(update, context):
     #return ConversationHandler.END
 
 def sum(update, context):
+    createFinanceModel(update.effective_chat.id)
     #print("chat_id: {}".format(update.effective_chat.id))
     context.bot.send_message(chat_id=update.effective_chat.id, text=finance.compareMonths())
 
@@ -106,29 +122,44 @@ def cancel(update, context):
 
     return ConversationHandler.END
 
-start_handler = CommandHandler("start", start)
-show_handler = CommandHandler("show", show)
-sum_handler = CommandHandler("sum", sum)
-pots_handler = CommandHandler("pots", pots)
+def fill(update, context):
+    createFinanceModel(update.effective_chat.id)
+    finance.fillDB(update.effective_chat.id)
+    global finance
+    finance = False
+    context.bot.send_message(chat_id=update.effective_chat.id, text="You have filled the database with fake data")
 
-conv_handler = ConversationHandler(
-    entry_points=[CommandHandler("add", add)],
+def main():
+    updater = Updater(token=moneyBucketsToken, use_context=True)
+    dp = updater.dispatcher
 
-    states = {
-        WALLET: [MessageHandler(Filters.text & ~Filters.command, wallet)],
+    start_handler = CommandHandler("start", start)
+    show_handler = CommandHandler("show", show)
+    sum_handler = CommandHandler("sum", sum)
+    pots_handler = CommandHandler("pots", pots)
+    fill_handler = CommandHandler("fill", fill)
 
-        DRAWER: [MessageHandler(Filters.text & ~Filters.command, drawer)],
+    conv_handler = ConversationHandler(
+        entry_points=[CommandHandler("add", add)],
 
-        BANK: [MessageHandler(Filters.text & ~Filters.command, bank)],
-    },
+        states={
+            WALLET: [MessageHandler(Filters.text & ~Filters.command, wallet)],
 
-    fallbacks=[CommandHandler('cancel', cancel)],
-)
+            DRAWER: [MessageHandler(Filters.text & ~Filters.command, drawer)],
 
-dispatcher.add_handler(start_handler)
-dispatcher.add_handler(show_handler)
-dispatcher.add_handler(conv_handler)
-dispatcher.add_handler(pots_handler)
-dispatcher.add_handler(sum_handler)
+            BANK: [MessageHandler(Filters.text & ~Filters.command, bank)],
+        },
 
-updater.start_polling()
+        fallbacks=[CommandHandler('cancel', cancel)],
+    )
+
+    dp.add_handler(start_handler)
+    dp.add_handler(show_handler)
+    dp.add_handler(conv_handler)
+    dp.add_handler(pots_handler)
+    dp.add_handler(sum_handler)
+    dp.add_handler(fill_handler)
+
+    updater.start_polling()
+
+main()

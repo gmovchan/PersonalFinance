@@ -58,7 +58,7 @@ class personalFinance():
         self.cleanedTable = self.updateCleanedTable()
 
     def saveToSQL(self):
-        self.moneyDB.to_sql("money", self.engine, if_exists="append", index_label="index")
+        self.moneyDB.to_sql("money", self.engine, if_exists="replace", index_label="index")
         #print(self.engine.execute("SELECT * FROM money").fetchall())
     
     
@@ -68,12 +68,14 @@ class personalFinance():
             #print(key)
             pockets[key] = int(pockets[key])
         #print(self.moneyDB)
+
         # check whether you have already added money today or not. If you have done it then the last entry
         # will be rewritten.
         matchingRows = self.moneyDB[(self.moneyDB["users"] == self.user) & (self.moneyDB["years"] == self.today.year) &
                                     (self.moneyDB["months"] == self.today.month) &
                                     (self.moneyDB["days"] == self.today.day)]
-    
+        print("matchingRows.empty: {}".format(matchingRows.empty))
+        print(matchingRows.head())
         if matchingRows.empty:
             '''self.moneyDB = self.moneyDB.append({"users": self.user, "years": self.today.year, "months": self.today.month, "days": self.today.day,
                             "wallet": pockets["wallet"], "drawer": pockets["drawer"],
@@ -90,6 +92,7 @@ class personalFinance():
 
         else:
             indexRow = matchingRows.iloc[0].name
+            print("indexRow: {}".format(indexRow))
             self.moneyDB = self.moneyDB.replace({"wallet": {self.moneyDB["wallet"][indexRow]: pockets["wallet"]},
                              "drawer": {self.moneyDB["drawer"][indexRow]: pockets["drawer"]},
                              "bank": {self.moneyDB["bank"][indexRow]: pockets["bank"]}})
@@ -201,9 +204,13 @@ class personalFinance():
 
         #print(self.cleanedTable.to_string())
 
+        #show the last entries at the end of the list to improve readability in the chat
+        sortedDF = self.cleanedTable.copy()
+        sortedDF = sortedDF.sort_values(by=["years", "months", "days"], ascending=True)
+
         result = ""
 
-        for index, row in self.cleanedTable.iterrows():
+        for index, row in sortedDF.iterrows():
             sum = int(row['wallet']) + int(row['drawer']) + int(row['bank'])
             result += "Date: {}/{}/{}\nwallet {} \u20BD, drawer {} \u20BD, bank {} \u20BD\nIn total: {} \u20BD\n\n".format(row['days'], row['months'], \
             row['years'], row['wallet'], row['drawer'], row['bank'], sum)
@@ -211,6 +218,19 @@ class personalFinance():
         #print(result)
 
         return result
+
+    def fillDB(self, id):
+        fakeDB = self.emptyMoneyDB.copy()
+        print(fakeDB)
+
+        for x in range(7):
+            fakeDB = fakeDB.append({"users": id, "years": randrange(2016, 2020), "months": randrange(1, 13),
+                                    "days": randrange(1, 32), "wallet": randrange(0, 1000), "drawer": randrange(0, 1000),
+                                    "bank": randrange(0, 1000)}, ignore_index=True)
+
+        fakeDB.to_sql("money", con=self.engine, if_exists="replace")
+
+        return True
 
     def start(self):
         while input("Would you like to add an entry (y/n)? ") == "y":
