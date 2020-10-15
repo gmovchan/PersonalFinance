@@ -115,3 +115,16 @@ print(df.index.max())
 newRow = pd.DataFrame.from_dict({"years": [1], "months": [1]}).astype("int64")
 
 print(newRow.head())
+
+class Dog:
+    def __init__(self, sound="woof"):
+        self.sound = sound
+    def makeNoise(self):
+        print(self.sound)
+    def reset(self):
+        pass
+
+dog = Dog("meow")
+dog.makeNoise()
+dog.reset()
+dog.makeNoise()

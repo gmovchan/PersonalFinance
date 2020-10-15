@@ -46,16 +46,23 @@ class personalFinance():
         self.user = user_id
         self.engine = engine
         #query = "SELECT * FROM money WHERE users = {}".format(user_id)
-        self.moneyDB = pd.read_sql_table("money", self.engine, index_col="index")
+        self.moneyDB = False
         #self.moneyDB = self.moneyDB[self.moneyDB["users"] == int(userId)]
-        self.maxIndex = self.moneyDB.index.max()
+        self.maxIndex = False
         #print(self.moneyDB)
 
-        self.emptyMoneyDB = self.moneyDB[0:0].copy()
+        self.emptyMoneyDB = False
+
+        self.readSQL()
         
         self.today = date.today()
 
         self.cleanedTable = self.updateCleanedTable()
+
+    def readSQL(self):
+        self.moneyDB = pd.read_sql_table("money", self.engine, index_col="index")
+        self.maxIndex = self.moneyDB.index.max()
+        self.emptyMoneyDB = self.moneyDB[0:0].copy()
 
     def saveToSQL(self):
         self.moneyDB.to_sql("money", self.engine, if_exists="replace", index_label="index")

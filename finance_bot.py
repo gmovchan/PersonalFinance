@@ -125,8 +125,6 @@ def cancel(update, context):
 def fill(update, context):
     createFinanceModel(update.effective_chat.id)
     finance.fillDB(update.effective_chat.id)
-    global finance
-    finance = False
     context.bot.send_message(chat_id=update.effective_chat.id, text="You have filled the database with fake data")
 
 def main():
