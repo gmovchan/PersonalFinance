@@ -67,8 +67,18 @@ class personalFinance():
     def saveToSQL(self):
         self.moneyDB.to_sql("money", self.engine, if_exists="replace", index_label="index")
         #print(self.engine.execute("SELECT * FROM money").fetchall())
-    
-    
+
+    def getNameOfMonth(self, n):
+        months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+                  "November", "December"]
+        monthDic = {}
+        c = 0
+        for x in range(1, 13):
+            monthDic[x] = months[c]
+            c += 1
+
+        return monthDic[n]
+
     def addMoney(self, pockets):
 
         for key in pockets:
@@ -219,8 +229,10 @@ class personalFinance():
 
         for index, row in sortedDF.iterrows():
             sum = int(row['wallet']) + int(row['drawer']) + int(row['bank'])
-            result += "Date: {}/{}/{}\nwallet {} \u20BD, drawer {} \u20BD, bank {} \u20BD\nIn total: {} \u20BD\n\n".format(row['days'], row['months'], \
-            row['years'], row['wallet'], row['drawer'], row['bank'], sum)
+            '''result += "Date: {}/{}/{}\nwallet {} \u20BD, drawer {} \u20BD, bank {} \u20BD\nIn total: {} \u20BD\n\n".format(row['days'], row['months'], \
+            row['years'], row['wallet'], row['drawer'], row['bank'], sum)'''
+            result += "{} {}\nwallet {} \u20BD, drawer {} \u20BD, bank {} \u20BD\nIn total: {} \u20BD\n\n".format(
+                self.getNameOfMonth(row['months']), row['years'], row['wallet'], row['drawer'], row['bank'], sum)
 
         #print(result)
 

@@ -128,3 +128,17 @@ dog = Dog("meow")
 dog.makeNoise()
 dog.reset()
 dog.makeNoise()
+
+
+def getNameOfMonth(n):
+    months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+              "November", "December"]
+    monthDic = {}
+    c = 0
+    for x in range(1, 13):
+        monthDic[x] = months[c]
+        c += 1
+
+    return monthDic[n]
+
+print(getNameOfMonth(2))

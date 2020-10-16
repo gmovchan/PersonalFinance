@@ -1,7 +1,7 @@
 from passwords import moneyBucketsToken
 import logging
 from telegram.ext import (CommandHandler, MessageHandler, Filters, Updater, ConversationHandler)
-from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove, ParseMode)
+from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove, ParseMode, Bot)
 from passwords import moneyBucketsToken
 from main import personalFinance
 from main import engine
@@ -16,19 +16,25 @@ from main import engine
 #print(engine.table_names())
 
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 pockets = {"wallet": 0, "drawer": 0, "bank": 0}
 
 WALLET, DRAWER, BANK, SUM = range(4)
 
 finance = False
+chat_id = False
 
 def createFinanceModel(id):
     global finance
-
+    global chat_id
+    chat_id = id
     if not finance:
         finance = personalFinance(engine, id)
 
+def restartFinanceModel(id=chat_id):
+    global finance
+    finance = personalFinance(engine, id)
 
 def checkInput(update):
     if not update.message.text.isdigit():
@@ -127,7 +133,20 @@ def fill(update, context):
     finance.fillDB(update.effective_chat.id)
     context.bot.send_message(chat_id=update.effective_chat.id, text="You have filled the database with fake data")
 
+def sendMsg(msg, chat_if=chat_id, token=moneyBucketsToken):
+    bot = Bot(token=token)
+    bot.send_message(chat_id=chat_id, text=msg)
+
+def error_callback(update, context):
+    logger.warning('Update "%s" caused error "%s"', update, context.error)
+    print("Update {} caused error {}".format(update, context.error))
+    restartFinanceModel()
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text="Some error has happened and the bot has been restarted as a precaution. "
+                                  "\nThe cause of the error: {}".format(context.error))
+
 def main():
+
     updater = Updater(token=moneyBucketsToken, use_context=True)
     dp = updater.dispatcher
 
@@ -157,6 +176,7 @@ def main():
     dp.add_handler(pots_handler)
     dp.add_handler(sum_handler)
     dp.add_handler(fill_handler)
+    dp.add_error_handler(error_callback)
 
     updater.start_polling()
 
