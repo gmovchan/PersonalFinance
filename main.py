@@ -1,30 +1,8 @@
 import pandas as pd
 from datetime import date
-from datetime import time
+#from datetime import time
 from random import randrange
 from sqlalchemy import create_engine
-#from IPython.display import clear_output
-
-
-#print(engine.table_names())
-
-#table = engine.execute("SELECT * FROM money")
-#print(table.keys())
-#print(table.column_descriptions())
-
-'''def createNewEngine():
-    moneyDB = pd.DataFrame.from_dict({"users": [], "years": [], "months": [], "days": [], "wallet": [], "drawer": [],
-                                      "bank": []}).astype("int64")
-
-    for x in range(12):
-        moneyDB = moneyDB.append({"users": randrange(183291591, 183291594), "years": randrange(2016, 2020), "months":
-            randrange(1, 13), "days": randrange(1, 32), "wallet": randrange(0, 1000), "drawer": randrange(0, 1000),
-                                  "bank":
-                                      randrange(0, 1000)}, ignore_index=True)
-
-    engine = create_engine("sqlite://", echo=False)
-    moneyDB.to_sql("money", con=engine)
-    return engine'''
 
 engine = create_engine("sqlite:///finance.db", echo=False)
 #engine = create_engine("sqlite:///C:\\sqlite\\finance.db", echo=False)
@@ -32,31 +10,14 @@ engine = create_engine("sqlite:///finance.db", echo=False)
 
 class personalFinance():
     def __init__(self, engine, user_id):
-        
-        '''self.moneyDB = pd.DataFrame.from_dict({"users": [], "years": [], "months": [], "days": [], "wallet": [], "drawer": [],
-                                          "bank": []}).astype("int64")
-
-        self.emptyMoneyDB = self.moneyDB.copy()
-
-        for x in range(12):
-            self.moneyDB = self.moneyDB.append({"years": randrange(2016, 2020), "months": randrange(1, 13), "days": randrange(1, 32),
-                                      "wallet": randrange(0, 1000), "drawer": randrange(0, 1000), "bank": randrange(0, 1000)},
-                                     ignore_index=True)'''
 
         self.user = user_id
         self.engine = engine
-        #query = "SELECT * FROM money WHERE users = {}".format(user_id)
         self.moneyDB = False
-        #self.moneyDB = self.moneyDB[self.moneyDB["users"] == int(userId)]
         self.maxIndex = False
-        #print(self.moneyDB)
-
         self.emptyMoneyDB = False
-
         self.readSQL()
-        
         self.today = date.today()
-
         self.cleanedTable = self.updateCleanedTable()
 
     def readSQL(self):
@@ -66,7 +27,6 @@ class personalFinance():
 
     def saveToSQL(self):
         self.moneyDB.to_sql("money", self.engine, if_exists="replace", index_label="index")
-        #print(self.engine.execute("SELECT * FROM money").fetchall())
 
     def getNameOfMonth(self, n):
         months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
@@ -82,17 +42,14 @@ class personalFinance():
     def addMoney(self, pockets):
 
         for key in pockets:
-            #print(key)
             pockets[key] = int(pockets[key])
-        #print(self.moneyDB)
 
         # check whether you have already added money today or not. If you have done it then the last entry
         # will be rewritten.
         matchingRows = self.moneyDB[(self.moneyDB["users"] == self.user) & (self.moneyDB["years"] == self.today.year) &
                                     (self.moneyDB["months"] == self.today.month) &
                                     (self.moneyDB["days"] == self.today.day)]
-        print("matchingRows.empty: {}".format(matchingRows.empty))
-        print(matchingRows.head())
+
         if matchingRows.empty:
             '''self.moneyDB = self.moneyDB.append({"users": self.user, "years": self.today.year, "months": self.today.month, "days": self.today.day,
                             "wallet": pockets["wallet"], "drawer": pockets["drawer"],
@@ -101,19 +58,16 @@ class personalFinance():
                                              "days": [self.today.day], "wallet": [pockets["wallet"]],
                                              "drawer": [pockets["drawer"]], "bank": [pockets["bank"]]}).astype("int64")
 
-            print(newRow.head())
-
             self.maxIndex += 1
             newRow = newRow.rename(index={0: self.maxIndex})
             self.moneyDB = self.moneyDB.append(newRow)
 
         else:
             indexRow = matchingRows.iloc[0].name
-            print("indexRow: {}".format(indexRow))
             self.moneyDB = self.moneyDB.replace({"wallet": {self.moneyDB["wallet"][indexRow]: pockets["wallet"]},
                              "drawer": {self.moneyDB["drawer"][indexRow]: pockets["drawer"]},
                              "bank": {self.moneyDB["bank"][indexRow]: pockets["bank"]}})
-        print(self.moneyDB)
+
         self.saveToSQL()
 
     def getLastMonth(self):
@@ -131,8 +85,6 @@ class personalFinance():
         if lastMonth.empty:
             return 0
         lastMonthSum = int(lastMonth.wallet + lastMonth.drawer + lastMonth.bank)
-        #print(lastMonthSum)
-        #print("You have {} rubles in total".format(int(lastMonthSum)))
         return lastMonthSum
 
     def getPockets(self):
@@ -148,7 +100,6 @@ class personalFinance():
 
         # check if the user has fewer than two months in the database
         if len(self.cleanedTable.index.values) > 1:
-            response = ""
             previousMonth = self.cleanedTable.iloc[1]
             previousMonthSum = int(previousMonth.wallet + previousMonth.drawer + previousMonth.bank)
 
@@ -169,27 +120,20 @@ class personalFinance():
 
     # return dataframe that contains only the last day of a month and has no duplicates 
     def updateCleanedTable(self):
-        #print(self.moneyDB)
         cleandDF = self.emptyMoneyDB.copy()
         userMoneyDB = self.moneyDB[self.moneyDB["users"] == int(self.user)]
         years = userMoneyDB.sort_values(by=["years"], ascending=False).drop_duplicates(["years"], keep="first")[
             "years"].tolist()
-        #print(years)
+
         for year in years:
-            #print(year)
             oneYear = userMoneyDB.loc[userMoneyDB["years"] == year].sort_values(by=["months", "days"], ascending=False) \
                 .drop_duplicates(["months"], keep="first")
             cleandDF = pd.concat([cleandDF, oneYear], ignore_index=True)
-            #print(oneYear)
-        #print(cleandDF)
+
         self.cleanedTable = cleandDF
         return True
     
     def showListByMonths(self):
-        '''if n.isdigit():
-            n = int(n)
-        elif not n or not isinstance(n, int):
-            n = 1000'''
         self.updateCleanedTable()
         return self.cleanedTable.head(100)
 
@@ -205,9 +149,7 @@ class personalFinance():
         num = input("in the bank account: ")
         pockets["bank"] = int(num) if num.isdigit() else 0
 
-        # clear_output()
         self.addMoney(pockets)
-        #print(self.moneyDB)
 
     def getJSON(self):
         self.updateCleanedTable()
@@ -215,13 +157,6 @@ class personalFinance():
 
     def getTable(self):
         self.updateCleanedTable()
-        #print(self.cleanedTable.to_string())
-        #return "<pre>" + self.cleanedTable.to_string() + "</pre>"
-        #return self.cleanedTable.to_string()
-
-        #print(self.cleanedTable.to_string())
-
-        #show the last entries at the end of the list to improve readability in the chat
         sortedDF = self.cleanedTable.copy()
         sortedDF = sortedDF.sort_values(by=["years", "months", "days"], ascending=True)
 
@@ -234,13 +169,10 @@ class personalFinance():
             result += "{} {}\nwallet {} \u20BD, drawer {} \u20BD, bank {} \u20BD\nIn total: {} \u20BD\n\n".format(
                 self.getNameOfMonth(row['months']), row['years'], row['wallet'], row['drawer'], row['bank'], sum)
 
-        #print(result)
-
         return result
 
     def fillDB(self, id):
         fakeDB = self.emptyMoneyDB.copy()
-        print(fakeDB)
 
         for x in range(7):
             fakeDB = fakeDB.append({"users": id, "years": randrange(2016, 2020), "months": randrange(1, 13),
@@ -254,7 +186,7 @@ class personalFinance():
     def start(self):
         while input("Would you like to add an entry (y/n)? ") == "y":
             self.inputMoneyToAdd()
-        #print(self.cleanedTable.head(100))
+
         if input("Would you like to know the amount of money you currently have(y/n)? ") == "y":
             print(self.compareMonths())
 
@@ -263,7 +195,3 @@ class personalFinance():
 
 if __name__ == "__main__":
     finance = personalFinance(engine, 100000000)
-    # print(finance.getJSON())
-    # finance.start()
-    # print(finance.getTable())
-    print(finance.compareMonths())

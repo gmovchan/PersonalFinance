@@ -37,17 +37,11 @@ def start(update, context):
 
 def show(update, context):
     global finance
-    print("finance in show")
-    print(finance)
     createFinanceModel(update.effective_chat.id)
-    print(update.effective_chat)
     context.bot.send_message(chat_id=update.effective_chat.id, text=finance.getTable())
 
 def add(update, context):
-    print("add")
     createFinanceModel(update.effective_chat.id)
-    print("finance in add")
-    print(finance)
     update.message.reply_text("How much money in your wallet? Type below.")
 
     return WALLET
@@ -93,7 +87,6 @@ def sum(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text=finance.compareMonths())
 
 def cancel(update, context):
-    print("try to cancel")
     update.message.reply_text("You have decided not to add a new entry.")
 
     return ConversationHandler.END
