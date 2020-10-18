@@ -1,4 +1,4 @@
-import telegram
+#import telegram
 #from main import personalFinance
 from telegram.ext import Updater
 import logging

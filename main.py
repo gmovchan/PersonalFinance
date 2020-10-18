@@ -26,8 +26,8 @@ from sqlalchemy import create_engine
     moneyDB.to_sql("money", con=engine)
     return engine'''
 
-engine = create_engine("sqlite:///C:\\sqlite\\finance.db", echo=False)
-
+engine = create_engine("sqlite:///finance.db", echo=False)
+#engine = create_engine("sqlite:///C:\\sqlite\\finance.db", echo=False)
 
 
 class personalFinance():
@@ -261,8 +261,9 @@ class personalFinance():
         if input("Do you want to see the list of entries (y/n)? ") == "y":
             print(self.showListByMonths())
 
-finance = personalFinance(engine, 100000000)
-#print(finance.getJSON())
-#finance.start()
-#print(finance.getTable())
-print(finance.compareMonths())
+if __name__ == "__main__":
+    finance = personalFinance(engine, 100000000)
+    # print(finance.getJSON())
+    # finance.start()
+    # print(finance.getTable())
+    print(finance.compareMonths())
