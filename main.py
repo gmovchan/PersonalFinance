@@ -1,11 +1,13 @@
 import pandas as pd
 from datetime import date
-#from datetime import time
+# from datetime import time
 from random import randrange
 from sqlalchemy import create_engine
 
 engine = create_engine("sqlite:///finance.db", echo=False)
-#engine = create_engine("sqlite:///C:\\sqlite\\finance.db", echo=False)
+
+
+# engine = create_engine("sqlite:///C:\\sqlite\\finance.db", echo=False)
 
 
 class personalFinance():
@@ -54,9 +56,10 @@ class personalFinance():
             '''self.moneyDB = self.moneyDB.append({"users": self.user, "years": self.today.year, "months": self.today.month, "days": self.today.day,
                             "wallet": pockets["wallet"], "drawer": pockets["drawer"],
                             "bank": pockets["bank"]}, ignore_index=True)'''
-            newRow = pd.DataFrame.from_dict({"users": [self.user], "years": [self.today.year], "months": [self.today.month],
-                                             "days": [self.today.day], "wallet": [pockets["wallet"]],
-                                             "drawer": [pockets["drawer"]], "bank": [pockets["bank"]]}).astype("int64")
+            newRow = pd.DataFrame.from_dict(
+                {"users": [self.user], "years": [self.today.year], "months": [self.today.month],
+                 "days": [self.today.day], "wallet": [pockets["wallet"]],
+                 "drawer": [pockets["drawer"]], "bank": [pockets["bank"]]}).astype("int64")
 
             self.maxIndex += 1
             newRow = newRow.rename(index={0: self.maxIndex})
@@ -65,8 +68,8 @@ class personalFinance():
         else:
             indexRow = matchingRows.iloc[0].name
             self.moneyDB = self.moneyDB.replace({"wallet": {self.moneyDB["wallet"][indexRow]: pockets["wallet"]},
-                             "drawer": {self.moneyDB["drawer"][indexRow]: pockets["drawer"]},
-                             "bank": {self.moneyDB["bank"][indexRow]: pockets["bank"]}})
+                                                 "drawer": {self.moneyDB["drawer"][indexRow]: pockets["drawer"]},
+                                                 "bank": {self.moneyDB["bank"][indexRow]: pockets["bank"]}})
 
         self.saveToSQL()
 
@@ -78,8 +81,7 @@ class personalFinance():
 
         lastMonth = self.cleanedTable.iloc[0]
         return lastMonth
-    
-    
+
     def getSum(self):
         lastMonth = self.getLastMonth()
         if lastMonth.empty:
@@ -104,7 +106,7 @@ class personalFinance():
             previousMonthSum = int(previousMonth.wallet + previousMonth.drawer + previousMonth.bank)
 
             message = "You've saved up {} rubles.".format(currentMonthSum)
-    
+
             if previousMonthSum > currentMonthSum:
                 message += "\nYou have {} rubles less than last month.".format(previousMonthSum - currentMonthSum)
             elif previousMonthSum < currentMonthSum:
@@ -132,7 +134,7 @@ class personalFinance():
 
         self.cleanedTable = cleandDF
         return True
-    
+
     def showListByMonths(self):
         self.updateCleanedTable()
         return self.cleanedTable.head(100)
@@ -176,7 +178,8 @@ class personalFinance():
 
         for x in range(7):
             fakeDB = fakeDB.append({"users": id, "years": randrange(2016, 2020), "months": randrange(1, 13),
-                                    "days": randrange(1, 32), "wallet": randrange(0, 1000), "drawer": randrange(0, 1000),
+                                    "days": randrange(1, 32), "wallet": randrange(0, 1000),
+                                    "drawer": randrange(0, 1000),
                                     "bank": randrange(0, 1000)}, ignore_index=True)
 
         fakeDB.to_sql("money", con=self.engine, if_exists="replace")
@@ -192,6 +195,7 @@ class personalFinance():
 
         if input("Do you want to see the list of entries (y/n)? ") == "y":
             print(self.showListByMonths())
+
 
 if __name__ == "__main__":
     finance = personalFinance(engine, 100000000)

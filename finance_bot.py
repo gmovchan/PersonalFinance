@@ -1,6 +1,6 @@
 import logging
 from telegram.ext import (CommandHandler, MessageHandler, Filters, Updater, ConversationHandler)
-#from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove, ParseMode, Bot)
+# from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove, ParseMode, Bot)
 from passwords import moneyBucketsToken
 from main import personalFinance
 from main import engine
@@ -15,6 +15,7 @@ WALLET, DRAWER, BANK, SUM = range(4)
 finance = False
 chat_id = False
 
+
 def createFinanceModel(id):
     global finance
     global chat_id
@@ -22,9 +23,11 @@ def createFinanceModel(id):
     if not finance:
         finance = personalFinance(engine, id)
 
+
 def restartFinanceModel(id=chat_id):
     global finance
     finance = personalFinance(engine, id)
+
 
 def checkInput(update):
     if not update.message.text.isdigit():
@@ -32,13 +35,17 @@ def checkInput(update):
         return False
     return True
 
+
 def start(update, context):
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Hello, {}!".format(update.effective_chat.first_name))
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text="Hello, {}!".format(update.effective_chat.first_name))
+
 
 def show(update, context):
     global finance
     createFinanceModel(update.effective_chat.id)
     context.bot.send_message(chat_id=update.effective_chat.id, text=finance.getTable())
+
 
 def add(update, context):
     createFinanceModel(update.effective_chat.id)
@@ -57,6 +64,7 @@ def wallet(update, context):
 
     return DRAWER
 
+
 def drawer(update, context):
     if not checkInput(update):
         return DRAWER
@@ -65,6 +73,7 @@ def drawer(update, context):
     update.message.reply_text("How much money in your bank account? Type below.")
 
     return BANK
+
 
 def bank(update, context):
     if not checkInput(update):
@@ -76,29 +85,36 @@ def bank(update, context):
 
     return ConversationHandler.END
 
+
 def pots(update, context):
     createFinanceModel(update.effective_chat.id)
     pockets = finance.getPockets()
-    context.bot.send_message(chat_id=update.effective_chat.id, text="You have {} in the wallet, {} in the drawer and {} "
-    "in the bank account.".format(pockets["wallet"], pockets["drawer"], pockets["bank"]))
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text="You have {} in the wallet, {} in the drawer and {} "
+                                  "in the bank account.".format(pockets["wallet"], pockets["drawer"], pockets["bank"]))
+
 
 def sum(update, context):
     createFinanceModel(update.effective_chat.id)
     context.bot.send_message(chat_id=update.effective_chat.id, text=finance.compareMonths())
+
 
 def cancel(update, context):
     update.message.reply_text("You have decided not to add a new entry.")
 
     return ConversationHandler.END
 
+
 def fill(update, context):
     createFinanceModel(update.effective_chat.id)
     finance.fillDB(update.effective_chat.id)
     context.bot.send_message(chat_id=update.effective_chat.id, text="You have filled the database with fake data")
 
+
 '''def sendMsg(msg, chat_if=chat_id, token=moneyBucketsToken):
     bot = Bot(token=token)
     bot.send_message(chat_id=chat_id, text=msg)'''
+
 
 def error_callback(update, context):
     logger.warning('Update "%s" caused error "%s"', update, context.error)
@@ -108,8 +124,8 @@ def error_callback(update, context):
                              text="Some error has happened and the bot has been restarted as a precaution. "
                                   "\nThe cause of the error: {}".format(context.error))
 
-def main():
 
+def main():
     updater = Updater(token=moneyBucketsToken, use_context=True)
     dp = updater.dispatcher
 
@@ -142,6 +158,7 @@ def main():
     dp.add_error_handler(error_callback)
 
     updater.start_polling()
+
 
 if __name__ == "__main__":
     main()
