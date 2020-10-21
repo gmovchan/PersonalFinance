@@ -65,10 +65,10 @@ for x in range(12):
         randrange(1, 13), "days": randrange(1, 32), "wallet": randrange(0, 1000), "drawer": randrange(0, 1000), "bank":
         randrange(0, 1000)}, ignore_index=True)
 
-engine = create_engine("sqlite://", echo=False)
-moneyDB.to_sql("money", con=engine)
+#engine = create_engine("sqlite://", echo=False)
+#moneyDB.to_sql("money", con=engine)
 
-SqlDB = pd.read_sql_table("money", engine, index_col="index")
+#SqlDB = pd.read_sql_table("money", engine, index_col="index")
 #print(SqlDB)
 
 '''query = "SELECT * FROM money WHERE users = {}".format("183291591")
@@ -76,17 +76,17 @@ result = engine.execute(query).fetchall()
 print(result)
 for row in result:
     print(row)'''
-int(1)
+#int(1)
 
-pockets = {"wallet": "1", "drawer": "2", "bank": "3"}
-for key in pockets:
+#pockets = {"wallet": "1", "drawer": "2", "bank": "3"}
+#for key in pockets:
     #print(key)
-    pockets[key] = int(pockets[key])
+    #pockets[key] = int(pockets[key])
 
 #print(pockets)
 
-users = [randrange(100000000, 999999999) for x in range(5)]
-users.append(183291591)
+#users = [randrange(100000000, 999999999) for x in range(5)]
+#users.append(183291591)
 #print(users)
 
 users = [771637784, 760305618, 921123602, 560227159, 968638050, 183291591]
@@ -99,9 +99,11 @@ for x in range(31):
         randrange(1, 13), "days": randrange(1, 32), "wallet": randrange(0, 1000), "drawer": randrange(0, 1000), "bank":
         randrange(0, 1000)}, ignore_index=True)
 
+print(moneyDB.iloc[0]["years"])
+
 #print(moneyDB.head(100))
 
-df = pd.DataFrame([[1, 2], [3, 4]], columns=["a", "b"])
+'''df = pd.DataFrame([[1, 2], [3, 4]], columns=["a", "b"])
 df2 = pd.DataFrame([[1, 2]], columns=["a", "b"])
 df2 = df2.rename(index={0: 2})
 print(df2.head())
@@ -141,4 +143,4 @@ def getNameOfMonth(n):
 
     return monthDic[n]
 
-print(getNameOfMonth(2))
+print(getNameOfMonth(2))'''
