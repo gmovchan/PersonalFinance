@@ -21,22 +21,22 @@ class personalFinance():
         self.moneyDB = False
         self.maxIndex = False
         self.emptyMoneyDB = False
-        self.readSQL()
+        self.updateSQLModel()
         self.today = date.today()
         self.cleanedTable = self.updateCleanedTable()
         self.meta = MetaData()
         self.moneyTb = Table("money", self.meta, autoload=True, autoload_with=engine)
 
-    def readSQL(self):
+    def updateSQLModel(self):
         #self.moneyDB = pd.read_sql_table("money", self.engine, index_col="index")
         self.moneyDB = pd.read_sql_table("money", self.engine, index_col="unique_id")
         #self.moneyDB = pd.read_sql_table("money", self.engine)
         #self.maxIndex = self.moneyDB.index.max()
         self.emptyMoneyDB = self.moneyDB[0:0].copy()
 
-    def saveToSQL(self):
+    #def saveToSQL(self):
         #self.moneyDB.to_sql("money", self.engine, if_exists="replace", index_label="index")
-        self.moneyDB.to_sql("money", self.engine, if_exists="replace", index_label="unique_id")
+        #self.moneyDB.to_sql("money", self.engine, if_exists="replace", index_label="unique_id")
 
     def getNameOfMonth(self, n):
         months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
@@ -95,6 +95,7 @@ class personalFinance():
                 #connection.execute(self.moneyTb.insert(), {"users": 183291591, "years": 2020, "months": 12, "days": 1, "wallet": 100, "drawer": 200, "bank": 300})
 
             #self.insertToSQLTale(ins)
+            self.updateSQLModel()
 
         else:
             print("update")
@@ -223,17 +224,17 @@ class personalFinance():
         return result
 
     def fillDB(self, id):
-        fakeDB = self.emptyMoneyDB.copy()
+        fakeDB = {}
 
         for x in range(7):
-            fakeDB = fakeDB.append({"users": id, "years": randrange(2016, 2020), "months": randrange(1, 13),
+            fakeDB[x] = {"users": id, "years": randrange(2016, 2020), "months": randrange(1, 13),
                                     "days": randrange(1, 32), "wallet": randrange(0, 1000),
-                                    "drawer": randrange(0, 1000),
-                                    "bank": randrange(0, 1000)}, ignore_index=True)
+                                    "drawer": randrange(0, 1000), "bank": randrange(0, 1000)}
 
-        fakeDB.to_sql("money", con=self.engine, if_exists="replace")
-
-        return True
+        with self.engine.begin() as connection:
+            for key in fakeDB:
+                print(fakeDB[key])
+                connection.execute(self.moneyTb.insert(), fakeDB[key])
 
     def start(self):
         while input("Would you like to add an entry (y/n)? ") == "y":
