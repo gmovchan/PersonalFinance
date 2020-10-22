@@ -56,14 +56,14 @@ class personalFinance():
 
         # check whether you have already added money today or not. If you have done it then the last entry
         # will be rewritten.
-        print(self.moneyDB.head(100))
+        #print(self.moneyDB.head(100))
         matchingRows = self.moneyDB[(self.moneyDB["users"] == self.user) & (self.moneyDB["years"] == self.today.year) &
                                     (self.moneyDB["months"] == self.today.month) &
                                     (self.moneyDB["days"] == self.today.day)]
-        print(matchingRows.head(100))
+        #print(matchingRows.head(100))
 
         if matchingRows.empty:
-            print("insert")
+            #print("insert")
             '''self.moneyDB = self.moneyDB.append({"users": self.user, "years": self.today.year, "months": self.today.month, "days": self.today.day,
                             "wallet": pockets["wallet"], "drawer": pockets["drawer"],
                             "bank": pockets["bank"]}, ignore_index=True)'''
@@ -94,13 +94,10 @@ class personalFinance():
                     pockets["drawer"], "bank": pockets["bank"]})
                 #connection.execute(self.moneyTb.insert(), {"users": 183291591, "years": 2020, "months": 12, "days": 1, "wallet": 100, "drawer": 200, "bank": 300})
 
-            #self.insertToSQLTale(ins)
-            self.updateSQLModel()
-
         else:
-            print("update")
+            #print("update")
             indexRow = int(matchingRows.iloc[0].name)
-            print(indexRow)
+            #print(indexRow)
             #indexRow = matchingRows.iloc[0]["unique_id"]
             '''self.moneyDB = self.moneyDB.replace({"wallet": {self.moneyDB["wallet"][indexRow]: pockets["wallet"]},
                                                  "drawer": {self.moneyDB["drawer"][indexRow]: pockets["drawer"]},
@@ -112,16 +109,11 @@ class personalFinance():
                 stmt = self.moneyTb.update().where(self.moneyTb.c.unique_id == indexRow).values(
                     wallet=pockets["wallet"], drawer=pockets["drawer"], bank=pockets["bank"]
                 )
-                print(connection.execute(stmt).last_updated_params())
+                connection.execute(stmt).last_updated_params()
 
         #self.saveToSQL()
-
-    def insertToSQLTale(self, ins):
-        print(ins)
-        #conn = self.engine.connect()
-        #result = conn.execute(ins)''
-        engine.execute(ins)
-        #print(result)
+        self.updateSQLModel()
+        #self.updateCleanedTable()
 
     def getLastMonth(self):
         self.updateCleanedTable()
@@ -145,6 +137,7 @@ class personalFinance():
         return pockets
 
     def compareMonths(self):
+        self.updateCleanedTable()
 
         currentMonthSum = self.getSum()
 
@@ -232,8 +225,9 @@ class personalFinance():
                                     "drawer": randrange(0, 1000), "bank": randrange(0, 1000)}
 
         with self.engine.begin() as connection:
+            connection.execute(self.moneyTb.delete())
             for key in fakeDB:
-                print(fakeDB[key])
+                #print(fakeDB[key])
                 connection.execute(self.moneyTb.insert(), fakeDB[key])
 
     def start(self):
@@ -245,6 +239,9 @@ class personalFinance():
 
         if input("Do you want to see the list of entries (y/n)? ") == "y":
             print(self.showListByMonths())
+
+        self.updateSQLModel()
+        self.updateCleanedTable()
 
 
 if __name__ == "__main__":
