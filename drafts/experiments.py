@@ -144,3 +144,15 @@ def getNameOfMonth(n):
     return monthDic[n]
 
 print(getNameOfMonth(2))'''
+
+
+result = ["{}table".format(x) for x in range(1, 10)]
+print("".join(result))
+
+n = 0
+str = ""
+
+for x in range(10):
+    str += "{}table".format(x + 1)
+
+print(str)
