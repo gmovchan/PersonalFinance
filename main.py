@@ -65,8 +65,6 @@ class personalFinance():
                 )
                 connection.execute(stmt).last_updated_params()
 
-        self.updateSQLModel()
-
     def getLastMonth(self):
         self.updateCleanedTable()
 
@@ -117,6 +115,7 @@ class personalFinance():
 
     # return dataframe that contains only the last day of a month and has no duplicates 
     def updateCleanedTable(self):
+        self.updateSQLModel()
         cleandDF = self.emptyMoneyDB.copy()
         userMoneyDB = self.moneyDB[self.moneyDB["users"] == int(self.user)]
         years = userMoneyDB.sort_values(by=["years"], ascending=False).drop_duplicates(["years"], keep="first")[
@@ -147,10 +146,6 @@ class personalFinance():
         pockets["bank"] = int(num) if num.isdigit() else 0
 
         self.addMoney(pockets)
-
-    def getJSON(self):
-        self.updateCleanedTable()
-        return self.cleanedTable.to_json()
 
     def getTable(self):
         self.updateCleanedTable()
